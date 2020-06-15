@@ -4,4 +4,4 @@ This is repository for the manuscript "Capturing cell-type specific compartment 
 
 # Data
 
-Raw .fastq and aligned .bam files are available on 4DN Data Portal (https://data.4dnucleome.org/). Some of the input and output data for topic modeling are stored in this repository.
+Raw .fastq and aligned .bam files are available on 4DN Data Portal (https://data.4dnucleome.org/).
