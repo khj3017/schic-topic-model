@@ -4,4 +4,5 @@ This is repository for the manuscript "Capturing cell-type specific compartment 
 
 # Data
 
-Raw .fastq and aligned .bam files are available on 4DN Data Portal (https://data.4dnucleome.org/).
+Raw .fastq and aligned .bam files are available on 4DN Data Portal (https://data.4dnucleome.org/). <br />
+Processed data files are available on https://noble.gs.washington.edu/proj/schic-topic-model.
