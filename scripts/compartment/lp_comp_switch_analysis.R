@@ -12,22 +12,21 @@ suppressPackageStartupMessages(suppressWarnings({
 }))
 
 # define parameters
-topicDir = '/net/trapnell/vol1/home/khj3017/proj/scripts/cisTopic_analyses/cisTopic_beds/500000_10Mb_NormTop_0.999'
-outDir = '/net/trapnell/vol1/home/khj3017/proj/scripts/cisTopic_analyses/cisTopic_beds/500000_10Mb_NormTop_0.999'
-LPDir = '/net/noble/vol5/user/khj3017/sparse_matrices_LP_names/ESR7_20_LPnames.txt'
+topicDir = "Bed_500000_10Mb_NormTop_0.9975"
+LPDir = "LP_names_500kb_10Mb.txt"
 
-comp_dir = "/net/noble/vol5/user/khj3017/compartment/aggregated/bedgraphs_new"
+comp_dir = "results/compartment_calls"
 resolution = 500000
 cell_types = c("H1Esc", "GM12878", "HFF", "IMR90", "HAP1")
 
-num_topics = 45
+num_topics = 30
 topics = 1:num_topics
 
-topic_H1Esc = c(13,15,16,17,35,40,5)
-topic_GM = c(11,12,14,18,3,39,42)
-topic_HAP1 = c(10,21,24,37)
-topic_HFF = c(20,28,45,9)
-topic_IMR = c(31,32)
+topic_H1Esc = c(13,14,26)
+topic_GM = c(19,24,3,5)
+topic_HAP1 = c(22,7,9)
+topic_HFF = c(1,23,28)
+topic_IMR = c(6)
 
 topic_list = list()
 topic_list[['HAP1']] = topic_HAP1
@@ -151,7 +150,7 @@ comp_switch_df = get_comp_switches(concatenated_comp_df)
 ## annotate lps whether they contain compartment switching regions
 # CS = compartment switching
 annotated_df = NULL
-annotated_general_df = NULL
+annotated_non_cell_type_df = NULL
 annotated_df_all = NULL
 
 annotate_lps = function(lp_df, type) {
@@ -169,7 +168,7 @@ annotate_lps = function(lp_df, type) {
 
 for (type in names(comp_switch_df)) { 
     annotated_df[[type]] = annotate_lps(filtered_out_df %>% filter(cell_type == type), type)
-    annotated_general_df[[type]] = annotate_lps(filtered_out_df %>% filter(cell_type == "general"), type)
+    annotated_non_cell_type_df[[type]] = annotate_lps(filtered_out_df %>% filter(cell_type != type), type)
     annotated_df_all[[type]] = annotate_lps(all_lps, type)
 }
 
@@ -197,7 +196,7 @@ for (type in names(comp_switch_df)) {
     
     ddf[which(ddf$CS %in% obs$CS),]$n = obs$n
     
-    print(chisq.test(ddf$n, p = backgd$n))
+    #print(chisq.test(ddf$n, p = backgd$n))
     
     ddf$n = log2(ddf$n / backgd$n)
     ddf = ddf %>% 
@@ -241,44 +240,52 @@ for (type in names(comp_switch_df)) {
                         mutate(comp = paste0(chr, "-", midpoint)) %>% as.data.frame() %>%
                         mutate(assign = ifelse(.[[type]] > 0, "A", "B"))
 
-    
-
-    backgd = annotated_df_all[[type]] %>%
+    temp = annotated_df_all[[type]] %>%
         filter(CS == "Y") %>%
-        rowwise() %>%
-        mutate(Start_Assign = ifelse(Start_CS == "Y", 
-                               comp_temp[comp_temp$midpoint == start,]$assign, "")) %>%
-        mutate(End_Assign = ifelse(End_CS == "Y", 
-                               comp_temp[comp_temp$midpoint == end,]$assign, "")) %>%
-        mutate(assign = paste0(Start_Assign, End_Assign)) %>%
-        mutate(assign = ifelse(assign == "BA", "AB", assign)) %>%
-        as.data.frame() %>%
-        count(assign) %>%
-        tidyr::spread(assign, n)
+	mutate(comp_start = paste0(chr, "-", start)) %>%
+        mutate(comp_end = paste0(chr, "-", end))   
 
-    obs = annotated_df[[type]] %>% 
-        filter(CS == "Y") %>%
-        rowwise() %>%
-        mutate(Start_Assign = ifelse(Start_CS == "Y", 
-                               comp_temp[comp_temp$midpoint == start,]$assign, "")) %>%
-        mutate(End_Assign = ifelse(End_CS == "Y", 
-                               comp_temp[comp_temp$midpoint == end,]$assign, "")) %>%
-        mutate(assign = paste0(Start_Assign, End_Assign)) %>%
-        mutate(assign = ifelse(assign == "BA", "AB", assign)) %>%
-        as.data.frame() %>%
-        count(assign) %>%
-        tidyr::spread(assign, n)
-        mutate(n = n / sum(n))) 
+    backgd = rbind(temp %>% select(chr, start, topic:CS) %>%
+          dplyr::rename(midpoint = start),
+          temp %>% select(chr, end, topic:CS) %>%
+          dplyr::rename(midpoint = end)) %>%
+        	distinct(chr, midpoint, .keep_all = T) %>%
+        	rowwise() %>%
+        	mutate(comp_mid = paste0(chr, "-", midpoint)) %>%
+        	as.data.frame() %>%
+        	filter(comp_mid %in% comp_temp$comp) %>%
+        	rowwise() %>%
+        	mutate(assign = comp_temp[comp_temp$comp == comp_mid,]$assign) %>%
+        	as.data.frame() %>%
+        	count(assign) %>%
+        	tidyr::spread(assign, n)
     
+    temp = annotated_df[[type]] %>%
+		filter(CS == "Y")   
+    
+    obs = rbind(temp %>% select(chr, start, topic:CS) %>%
+          dplyr::rename(midpoint = start),
+          temp %>% select(chr, end, topic:CS) %>%
+          dplyr::rename(midpoint = end)) %>%
+		distinct(chr, midpoint, .keep_all = T) %>%
+        	rowwise() %>%
+        	mutate(comp_mid = paste0(chr, "-", midpoint)) %>%
+       		as.data.frame() %>%
+        	filter(comp_mid %in% comp_temp$comp) %>%
+        	rowwise() %>%
+        	mutate(assign = comp_temp[comp_temp$comp == comp_mid,]$assign) %>%
+        	as.data.frame() %>%
+        	count(assign) %>%
+        	tidyr::spread(assign, n)
+
     
     ddf = data.frame(A = 0, AA = 0, AB = 0,
                       B = 0, BB = 0)
     
     ddf[1,which(colnames(ddf) %in% colnames(obs))] = obs
     
-    df = data.frame(A = ddf$A + 2*ddf$AA + ddf$AB,
-                    B = ddf$B + 2*ddf$BB + ddf$AB)
-    
+    df = data.frame(A = ddf$A + ddf$AA + ddf$AB,
+                    B = ddf$B + ddf$BB + ddf$AB)
     
     
     ddf = data.frame(A = 0, AA = 0, AB = 0,
@@ -288,7 +295,6 @@ for (type in names(comp_switch_df)) {
 
     dff = data.frame(A = ddf$A + 2*ddf$AA + ddf$AB,
                     B = ddf$B + 2*ddf$BB + ddf$AB)
-    
     
     
     df = df %>%
@@ -303,17 +309,17 @@ for (type in names(comp_switch_df)) {
         mutate(log2_enrich = log2(obs / back))
     
     display(dff)
-    display(chisq.test(dff$obs, p = dff$back))
+    #display(chisq.test(dff$obs, p = dff$back))
     
     comp_switch_enrichment[[type]] = dff
 }
 
 ## plot
-p = matrix(0L, nrow = 2, ncol = length(cell_types))
+p = matrix(0L, nrow = 2, ncol = length(cell_types)-1)
 
-cell_types_plot = c("GM12878", "H1Esc", "HAP1", "HFF", "IMR90")
+cell_types_plot = c("GM12878", "H1Esc", "HAP1", "HFF") #, "IMR90")
 
-for (i in 1:length(cell_types_plot)) {
+for (i in 1:length(cell_types_plot)-1) {
     p[,i] = comp_switch_enrichment[[cell_types_plot[i]]]$log2_enrich
 }
 
@@ -326,7 +332,7 @@ myColor <- rev(colorRampPalette(RColorBrewer::brewer.pal(7, "YlGnBu"))(paletteLe
 
 options(repr.plot.width=5, repr.plot.height=3)
 pheatmap(p, breaks = c(seq(-0.6, 0, length.out=ceiling(paletteLength/2) + 1),
-            seq(0.3/paletteLength, 0.3, length.out=floor(paletteLength/2))),
+            seq(0.2/paletteLength, 0.2, length.out=floor(paletteLength/2))),
          color = myColor,
          cluster_rows = FALSE,
          cluster_cols = FALSE,
@@ -368,7 +374,7 @@ filtered_mapped_gene_df = list()
 for (type in names(mapped_gene_df)) {
     filtered_mapped_gene_df[[type]] = mapped_gene_df[[type]] %>%
                     mutate(chr = paste0("chr", chr),
-                           midpoint = floor((start + end) / 2 / 500000) * 500000 + 250000) %>%
+                           midpoint = floor((start + end) / 2 / resolution) * resolution + resolution / 2) %>%
                     mutate(LP = paste0(chr, ":", midpoint)) %>%
                     filter(chr %in% paste0("chr", 1:22)) %>%
                     select(chr:LP, gene_short_name,starts_with('log2'), starts_with('padj')) %>%

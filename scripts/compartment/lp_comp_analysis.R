@@ -12,22 +12,21 @@ suppressPackageStartupMessages(suppressWarnings({
 }))
 
 # define parameters
-topicDir = '/net/trapnell/vol1/home/khj3017/proj/scripts/cisTopic_analyses/cisTopic_beds/500000_10Mb_NormTop_0.999'
-outDir = '/net/trapnell/vol1/home/khj3017/proj/scripts/cisTopic_analyses/cisTopic_beds/500000_10Mb_NormTop_0.999'
-LPDir = '/net/noble/vol5/user/khj3017/sparse_matrices_LP_names/ESR7_20_LPnames.txt'
+topicDir = "Bed_500000_10Mb_NormTop_0.9975"
+LPDir = "LP_names_500kb_10Mb.txt"
 
-comp_dir = "/net/noble/vol5/user/khj3017/compartment/aggregated/bedgraphs_new"
+comp_dir = "results/compartment_calls"
 resolution = 500000
 cell_types = c("H1Esc", "GM12878", "HFF", "IMR90", "HAP1")
 
-num_topics = 45
+num_topics = 30
 topics = 1:num_topics
 
-topic_H1Esc = c(13,15,16,17,35,40,5)
-topic_GM = c(11,12,14,18,3,39,42)
-topic_HAP1 = c(10,21,24,37)
-topic_HFF = c(20,28,45,9)
-topic_IMR = c(31,32)
+topic_H1Esc = c(13,14,26)
+topic_GM = c(19,24,3,5)
+topic_HAP1 = c(22,7,9)
+topic_HFF = c(1,23,28)
+topic_IMR = c(6)
 
 topic_list = list()
 topic_list[['HAP1']] = topic_HAP1

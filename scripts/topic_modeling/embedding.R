@@ -9,9 +9,9 @@ suppressPackageStartupMessages(suppressWarnings({
 }))
 
 # load cisTopicObject
-cisTopicObject = readRDS("cisTopicObject_500kb_10Mb.rds")
+cisTopicObject = readRDS("cisTopicObject_500kb_10Mb_final.rds")
 # select optimal topic number
-cisTopicObject@selected.model = cisTopicObject@models[['45']]
+cisTopicObject@selected.model = cisTopicObject@models[['30']]
 # run UMAP
 cisTopicObject = runUmap(cisTopicObject, target='cell', seed=999, method = 'Probability', n_components=2)
 

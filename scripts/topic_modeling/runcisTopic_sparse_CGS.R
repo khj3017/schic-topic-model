@@ -44,8 +44,8 @@ lp.annotations = read.table(
 
 cell.annotations = read.table(
     cell_file,
-    col.names = c("cell", "cell.type"),
-    colClasses = c("character", "factor"))
+    col.names = c("cell", "cell.type", "replicate"),
+    colClasses = c("character", "factor", "replicate"))
 
 rownames(lp.annotations) = lp.annotations$lp
 rownames(cell.annotations) = cell.annotations$cell
@@ -86,19 +86,10 @@ rownames(cell_list_ordered) <- colnames(mat)
 dim(mat)
 
 
-## add replicate info
-replicate_info_file = '/net/noble/vol5/user/khj3017/downsampled/median/labels/all_Hap1/all/replicates/replicates.labeled'
-replicate_info = read.table(replicate_info_file, header=F, 
-			    col.names = c("Cell", "Replicate"))
-replicate_info = as.matrix(replicate_info$Replicate[idx])
-rownames(replicate_info) = colnames(mat)
-colnames(replicate_info) = "Replicate"
-
 
 ###
 cisTopicObject <- createcisTopicObject(mat, project.name="full_cisTopic", keepCountsMatrix=FALSE)
 cisTopicObject <- addCellMetadata(cisTopicObject, cell.data = cell_list_ordered)
-#cisTopicObject <- addCellMetadata(cisTopicObject, cell.data = replicate_info)
 rm(mat)
 
 

@@ -1,8 +1,5 @@
 suppressPackageStartupMessages(suppressWarnings({
-    library(data.table)
-    library(Matrix)
     library(ggplot2)
-    library(irlba)
     library(cisTopic)
     library(dplyr)
     library(tibble)
@@ -10,7 +7,7 @@ suppressPackageStartupMessages(suppressWarnings({
 }))
 
 # load cisTopicObject
-cisTopicObject = readRDS("cisTopicObject_500kb_10Mb.rds")
+cisTopicObject = readRDS("cisTopicObject_500kb_10Mb_final.rds")
 
 
 # get topic-cell matrix
@@ -43,8 +40,8 @@ plot_distribution = function(topic_cell_mat, topic, xlims = NULL) {
     
 }
 
-plot_distribution(topic_cell_mat, 34)
-plot_distribution(topic_cell_mat, 39)
+plot_distribution(topic_cell_mat, 10)
+plot_distribution(topic_cell_mat, 5)
 
 
 # Wilcoxson test
@@ -142,7 +139,7 @@ res = t(res)
 colnames(res) = cell_type_unique
 rownames(res) = 1:nrow(res)
 
-cutoff = 1.25
+cutoff = 1.5
 topic_list = list()
 
 # get cell_type specific topic list 
@@ -185,10 +182,10 @@ pheatmap(res,
 
 ##### topic to lp annotation
 cisTopicObject <- getRegionsScores(cisTopicObject, method='NormTop', scale=TRUE)
-cisTopicObject <- binarizecisTopics(cisTopicObject, thrP=0.999, plot=F)
+cisTopicObject <- binarizecisTopics(cisTopicObject, thrP=0.9975, plot=F)
 
 
-out_dir = "/net/trapnell/vol1/home/khj3017/proj/scripts/cisTopic_analyses/cisTopic_beds/Bed_500000_10Mb_NormTop_0.999"
+out_dir = "Bed_500000_10Mb_NormTop_0.9975"
 if (!file.exists(out_dir)) {
     dir.create(out_dir)
 }
