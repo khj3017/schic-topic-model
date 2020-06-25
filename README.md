@@ -8,9 +8,8 @@ Raw .fastq and aligned .bam files are available on 4DN Data Portal (https://data
 Processed data files are available on https://noble.gs.washington.edu/proj/schic-topic-model.
 
 # Data preprocessing
-For preprocessing our data we followed the pipeline in https://github.com/VRam142/combinatorialHiC to generate sci-Hi-C matrix files binned at 500kb resolution. The .matrix files are in the format:
+For preprocessing our data we followed the pipeline in https://github.com/VRam142/combinatorialHiC to align the reads to hg19 and generate sci-Hi-C matrix files binned at 500kb resolution. The .matrix files are in the format:
 > bin1  bin2  count normalized_count  chr1  chr2
-
 
 # Construction of cell-locus pair matrix for topic modeling
 1. Run matrix_to_interaction.py to convert sci-Hi-C .matrix files to FitHiC interaction format (.int.bed):
